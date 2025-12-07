@@ -1,0 +1,17 @@
+Chave,Resumo,Responsável,Status,Criado,Story Points
+CUR-1,Novo layout da Home,Raphael Giovanini,Concluído,2023-09-01,13
+CUR-2,Implementação de filtros de busca,Gustavo,Em andamento,2023-09-05,8
+CUR-3,Correção no checkout,Rodrigo Papp,Escalated,2023-09-10,5
+CUR-4,Integração com gateway de pagamento,Fabiano,Tarefas pendente,2023-09-12,13
+CUR-5,Otimização de imagens,Victor,Backlog,2023-09-15,3
+CUR-6,SEO das páginas de produto,Samuel,Pronto para QA,2023-09-18,5
+CUR-7,Bug no carrinho de compras,Jeferson,Bug report,2023-09-20,8
+CUR-8,Alteração de cores do rodapé,Caio,Concluído,2023-09-22,2
+CUR-9,Melhoria na velocidade do site,Raphael Giovanini,Em andamento,2023-09-25,8
+CUR-10,Validar formulário de contato,Gustavo,Criado,2023-09-28,3
+CUR-11,Erro ao salvar endereço,Rodrigo Papp,Bug report,2023-09-30,5
+CUR-12,Atualizar banner principal,Fabiano,Concluído,2023-10-01,2
+CUR-13,Criar página de FAQ,Victor,Tarefas pendente,2023-10-02,5
+CUR-14,Revisar textos legais,Samuel,Não Procedente,2023-10-03,0
+CUR-15,Botão de comprar não funciona,Jeferson,Escalated,2023-10-04,13
+CUR-16,Adicionar depoimentos de clientes,Caio,Backlog,2023-10-05,3

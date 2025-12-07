@@ -1,0 +1,17 @@
+Chave,Resumo,Responsável,Status,Criado,Story Points
+MAN-1,Erro no banco de dados de produção,Raphael Giovanini,Escalated,2023-10-01,8
+MAN-2,Atualização de segurança do servidor,Gustavo,Concluído,2023-10-02,5
+MAN-3,Correção de bug na tela de login,Rodrigo Papp,Bug report,2023-10-03,3
+MAN-4,Monitoramento de performance,Fabiano,Em andamento,2023-10-04,5
+MAN-5,Backup automatizado falhou,Victor,Tarefas pendente,2023-10-05,2
+MAN-6,Revisão de logs de erro,Samuel,Backlog,2023-10-06,1
+MAN-7,Ajuste de permissões de usuário,Jeferson,Pronto para QA,2023-10-07,3
+MAN-8,Erro 404 na página de contato,Caio,Criado,2023-10-08,2
+MAN-9,Lentidão no relatório mensal,Raphael Giovanini,Em andamento,2023-10-09,5
+MAN-10,Script de migração de dados,Gustavo,Concluído,2023-10-10,8
+MAN-11,Integração com API externa,Rodrigo Papp,Escalated,2023-10-11,13
+MAN-12,Documentação da API,Fabiano,Backlog,2023-10-12,3
+MAN-13,Teste de carga no servidor,Victor,Cancelado,2023-10-13,0
+MAN-14,Refatoração do módulo de vendas,Samuel,Tarefas pendente,2023-10-14,8
+MAN-15,Bug visual no mobile,Jeferson,Bug report,2023-10-15,2
+MAN-16,Atualização de libs legadas,Caio,Não Procedente,2023-10-16,0

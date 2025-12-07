@@ -1,0 +1,17 @@
+Chave,Resumo,Responsável,Status,Criado,Story Points
+PROJ-1,Kickoff do Projeto Alpha,Raphael Giovanini,Concluído,2023-08-01,0
+PROJ-2,Definição de arquitetura,Gustavo,Concluído,2023-08-05,13
+PROJ-3,Desenvolvimento MVP - Fase 1,Rodrigo Papp,Em andamento,2023-08-15,20
+PROJ-4,Validação de hipóteses,Fabiano,Tarefas pendente,2023-08-20,8
+PROJ-5,Criação de protótipos,Victor,Backlog,2023-08-25,5
+PROJ-6,Testes de usabilidade,Samuel,Pronto para QA,2023-08-30,5
+PROJ-7,Ajustes pós-teste,Jeferson,Tarefas pendente,2023-09-05,3
+PROJ-8,Planejamento Sprint 2,Caio,Concluído,2023-09-10,0
+PROJ-9,Desenvolvimento MVP - Fase 2,Raphael Giovanini,Em andamento,2023-09-15,20
+PROJ-10,Revisão de código,Gustavo,Escalated,2023-09-20,5
+PROJ-11,Implantação em Homologação,Rodrigo Papp,Criado,2023-09-25,8
+PROJ-12,Treinamento da equipe,Fabiano,Cancelado,2023-09-30,0
+PROJ-13,Documentação técnica,Victor,Backlog,2023-10-01,5
+PROJ-14,Aprovação do cliente,Samuel,Tarefas pendente,2023-10-05,0
+PROJ-15,Correção de bugs críticos,Jeferson,Bug report,2023-10-10,13
+PROJ-16,Lançamento oficial,Caio,Backlog,2023-10-15,0
