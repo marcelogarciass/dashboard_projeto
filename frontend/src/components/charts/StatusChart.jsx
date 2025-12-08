@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
 
 const StatusChart = ({ data }) => {
     const processedData = useMemo(() => {
@@ -18,9 +18,34 @@ const StatusChart = ({ data }) => {
             statuses.add(item.Status);
         });
 
+        // Define specific order
+        const STATUS_ORDER = [
+            'Tarefas Pendentes', 
+            'Escalated', 
+            'Em Andamento', 
+            'Pronto para QA', 
+            'Aguardando Aprovação', 
+            'Bug Report'
+        ];
+
+        const sortedStatuses = Array.from(statuses).sort((a, b) => {
+            const indexA = STATUS_ORDER.indexOf(a);
+            const indexB = STATUS_ORDER.indexOf(b);
+            
+            // If both are in the list, sort by index
+            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+            
+            // If a is in list, it comes first
+            if (indexA !== -1) return -1;
+            if (indexB !== -1) return 1;
+            
+            // Otherwise alphabetical
+            return a.localeCompare(b);
+        });
+
         return {
             chartData: Object.values(pivoted),
-            statusKeys: Array.from(statuses)
+            statusKeys: sortedStatuses
         };
     }, [data]);
 
@@ -55,7 +80,9 @@ const StatusChart = ({ data }) => {
                             dataKey={status} 
                             fill={colors[index % colors.length]} 
                             radius={[4, 4, 0, 0]}
-                        />
+                        >
+                            <LabelList dataKey={status} position="top" style={{ fill: '#64748B', fontSize: '11px' }} />
+                        </Bar>
                     ))}
                 </BarChart>
             </ResponsiveContainer>
