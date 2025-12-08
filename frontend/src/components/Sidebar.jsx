@@ -46,10 +46,12 @@ const Sidebar = ({ availableFilters, selectedFilters, onFilterChange }) => {
   return (
     <aside className="w-72 bg-white border-r border-slate-200 flex flex-col h-full shadow-sm z-10">
       <div className="p-6 border-b border-slate-100 flex items-center gap-3">
-        <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
-            N
+        <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-white font-bold shadow-sm p-1.5">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+              <path d="M11.53 2c0-1.1-.9-2-2-2H2C.9 0 0 .9 0 2v8c0 1.1.9 2 2 2h7.53c1.1 0 2-.9 2-2V2zm12.47 10c0-1.1-.9-2-2-2h-7.53c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2H22c1.1 0 2-.9 2-2v-8zm-12.47 0c0-1.1-.9-2-2-2H2c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h7.53c1.1 0 2-.9 2-2v-8z" />
+            </svg>
         </div>
-        <span className="font-bold text-lg text-slate-800 tracking-tight">Nexus Analytics</span>
+        <span className="font-bold text-lg text-slate-800 tracking-tight">Jira Analytics</span>
       </div>
 
       <div className="p-6 flex-1 overflow-y-auto">
