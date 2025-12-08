@@ -380,18 +380,27 @@ with tabs[0]:
     with col1:
         st.subheader("📌 Status Detalhado por Projeto")
         
-        if not df_final.empty:
-            projs = sorted(df_final['Projeto'].unique())
+        if not df_kanban.empty:
+            # Color Map para Status (Padronização Visual)
+            color_map = {
+                'Concluído': '#36B37E', 'Done': '#36B37E', 'Finalizado': '#36B37E', 'Resolvido': '#36B37E', 'Closed': '#36B37E',
+                'Em andamento': '#0052CC', 'In Progress': '#0052CC', 'Doing': '#0052CC',
+                'Tarefas pendentes': '#42526E', 'To Do': '#42526E', 'Backlog': '#42526E', 'Open': '#42526E',
+                'Escalated': '#FF5630', 'ESCALADO': '#FF5630', 'Blocked': '#FF5630', 'Impedimento': '#FF5630',
+                'Bug Report': '#DE350B', 'Bug': '#DE350B',
+                'Pronto para QA': '#8777D9', 'Test': '#8777D9', 'Teste Cury': '#8777D9', 'Homologação': '#8777D9',
+                'Cancelado': '#172B4D', 'Não procedente': '#172B4D', 'Não Procedente': '#172B4D'
+            }
+
+            projs = sorted(df_kanban['Projeto'].unique())
             cols = st.columns(2)  # Grid de 2 colunas
             
             for i, proj in enumerate(projs):
                 with cols[i % 2]:
-                    # Filtrar dados do projeto (Usar df_kanban para ver TODO o backlog, sem filtro de data de criação)
-                    # Mas precisamos aplicar os outros filtros (Status, Tipo, etc) que já estão em df_kanban
+                    # Filtrar dados do projeto (Usar df_kanban para ver TODO o backlog)
                     d_p = df_kanban[df_kanban['Projeto'] == proj]
                     
                     if d_p.empty:
-                        st.caption(f"Sem dados para {proj}")
                         continue
 
                     # Contagem por status
@@ -401,13 +410,15 @@ with tabs[0]:
                     # Gráfico Individual
                     fig_p = px.bar(s_counts, x='Qtd', y='Status', orientation='h', 
                                    title=f"📁 {proj}", text_auto=True,
-                                   color='Status', color_discrete_sequence=px.colors.qualitative.Dark24)
+                                   color='Status', 
+                                   color_discrete_map=color_map,
+                                   color_discrete_sequence=px.colors.qualitative.Dark24)
                     
                     fig_p.update_layout(
-                        template="plotly_dark", 
+                        template="plotly_white", 
                         paper_bgcolor='rgba(0,0,0,0)', 
                         plot_bgcolor='rgba(0,0,0,0)', 
-                        font=dict(family="Rajdhani"),
+                        font=dict(family="Inter"),
                         showlegend=False,
                         height=250,
                         margin=dict(l=0, r=0, t=40, b=0)
@@ -447,14 +458,24 @@ with tabs[1]:
     
     k1, k2, k3, k4, k5 = st.columns(5)
     
-    abertas = len(df_final[~df_final['Status'].isin(status_concluidos)])
-    concluidas = len(df_final[df_final['Status'].isin(status_concluidos)])
-    criticos = len(df_final[df_final['Prioridade'].isin(['Highest', 'High', 'Critical']) & (~df_final['Status'].isin(status_concluidos))])
-    bugs = len(df_final[df_final['Tipo'] == 'Bug'])
-    bugs_pendentes = len(df_final[(df_final['Tipo'] == 'Bug') & (~df_final['Status'].isin(status_concluidos))])
+    # KPIs Corrigidos (Estoque vs Fluxo)
+    # Abertas: Estoque Total (df_kanban)
+    abertas = len(df_kanban[~df_kanban['Status'].isin(status_concluidos)])
     
-    k1.metric("Issues Abertas", abertas)
-    k2.metric("Issues Concluídas", concluidas)
+    # Concluídas: Fluxo no Período (Resolvido dentro das datas selecionadas)
+    if 'Resolvido' in df_kanban.columns:
+        mask_res = (df_kanban['Resolvido'] >= pd.to_datetime(start_date)) & (df_kanban['Resolvido'] <= pd.to_datetime(end_date))
+        concluidas = len(df_kanban[mask_res & df_kanban['Status'].isin(status_concluidos)])
+    else:
+        concluidas = 0
+        
+    # Críticos e Bugs: Estoque (df_kanban)
+    criticos = len(df_kanban[df_kanban['Prioridade'].isin(['Highest', 'High', 'Critical']) & (~df_kanban['Status'].isin(status_concluidos))])
+    bugs = len(df_kanban[df_kanban['Tipo'] == 'Bug']) # Total Geral
+    bugs_pendentes = len(df_kanban[(df_kanban['Tipo'] == 'Bug') & (~df_kanban['Status'].isin(status_concluidos))])
+    
+    k1.metric("Issues Abertas (Backlog)", abertas)
+    k2.metric("Concluídas (No Período)", concluidas)
     k3.metric("Bugs Pendentes", bugs_pendentes, f"{bugs} Total", delta_color="inverse")
     k4.metric("Itens Críticos", criticos, "Alta Prioridade", delta_color="inverse")
     
@@ -469,16 +490,17 @@ with tabs[1]:
     c_k1, c_k2 = st.columns(2)
     
     with c_k1:
-        st.subheader("Distribuição por Tipo")
-        fig_type = px.pie(df_final, names='Tipo', hole=0.6, title="Volume por Tipo de Demanda", color_discrete_sequence=px.colors.sequential.Plasma)
+        st.subheader("Distribuição por Tipo (Ativos)")
+        # Usar df_kanban para ver distribuição do trabalho atual
+        fig_type = px.pie(df_kanban, names='Tipo', hole=0.6, title="Volume por Tipo de Demanda (Backlog)", color_discrete_sequence=px.colors.sequential.Plasma)
         fig_type.update_layout(template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
         st.plotly_chart(fig_type, use_container_width=True)
         
     with c_k2:
         st.subheader("Funil de Status")
-        status_counts = df_final['Status'].value_counts().reset_index()
+        status_counts = df_kanban['Status'].value_counts().reset_index()
         status_counts.columns = ['Status', 'Qtd']
-        fig_funnel = px.funnel(status_counts, y='Status', x='Qtd', title="Funil de Execução", color='Qtd', color_discrete_sequence=['#00f3ff'])
+        fig_funnel = px.funnel(status_counts, y='Status', x='Qtd', title="Funil de Execução Total", color='Qtd', color_discrete_sequence=['#00f3ff'])
         fig_funnel.update_layout(template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
         st.plotly_chart(fig_funnel, use_container_width=True)
 
@@ -486,14 +508,14 @@ with tabs[1]:
 with tabs[2]:
     st.markdown("### 🏃 Gestão de Sprints")
     
-    # Filtro de Sprints específico
-    all_sprints = sorted(df_final['Sprint'].unique())
+    # Filtro de Sprints específico (Baseado em df_kanban para pegar todo histórico da sprint)
+    all_sprints = sorted(df_kanban['Sprint'].unique())
     sprint_selection = st.multiselect("Filtrar Sprints", all_sprints, default=[s for s in all_sprints if s != 'Backlog'][:5])
     
     if not sprint_selection:
         st.info("Selecione sprints para visualizar.")
     else:
-        df_sprint_view = df_final[df_final['Sprint'].isin(sprint_selection)]
+        df_sprint_view = df_kanban[df_kanban['Sprint'].isin(sprint_selection)]
         
         # Métricas da Sprint
         sp_total = df_sprint_view['Story Points'].sum()
