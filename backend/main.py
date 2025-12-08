@@ -123,7 +123,7 @@ def get_dashboard_data(filters: FilterParams):
     df = get_data()
     
     # Apply Filters
-    if filters.projects:
+    if filters.projects and "Todos" not in filters.projects:
         df = df[df['Projeto'].isin(filters.projects)]
     if filters.statuses:
         df = df[df['Status'].isin(filters.statuses)]

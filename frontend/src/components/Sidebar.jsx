@@ -14,6 +14,35 @@ const Sidebar = ({ availableFilters, selectedFilters, onFilterChange }) => {
     onFilterChange(key, values);
   };
 
+  const handleProjectChange = (e) => {
+    const options = e.target.options;
+    const newValues = [];
+    let todosSelected = false;
+
+    for (let i = 0, l = options.length; i < l; i++) {
+      if (options[i].selected) {
+        newValues.push(options[i].value);
+        if (options[i].value === 'Todos') todosSelected = true;
+      }
+    }
+    
+    // Logic for mutual exclusivity
+    const wasTodosSelected = selectedFilters.projects.includes('Todos');
+    let finalValues = newValues;
+
+    if (todosSelected) {
+        if (!wasTodosSelected) {
+            // User just clicked Todos -> Clear others
+            finalValues = ['Todos'];
+        } else if (newValues.length > 1) {
+             // User clicked something else while Todos was active -> Remove Todos
+             finalValues = newValues.filter(v => v !== 'Todos');
+        }
+    } 
+    
+    onFilterChange('projects', finalValues);
+  };
+
   return (
     <aside className="w-72 bg-white border-r border-slate-200 flex flex-col h-full shadow-sm z-10">
       <div className="p-6 border-b border-slate-100 flex items-center gap-3">
@@ -36,8 +65,9 @@ const Sidebar = ({ availableFilters, selectedFilters, onFilterChange }) => {
             multiple 
             className="w-full p-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[120px] bg-slate-50 text-slate-600"
             value={selectedFilters.projects}
-            onChange={(e) => handleMultiSelectChange(e, 'projects')}
+            onChange={handleProjectChange}
           >
+            <option value="Todos">Todos</option>
             {availableFilters.projects.map(p => (
               <option key={p} value={p}>{p}</option>
             ))}
