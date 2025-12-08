@@ -18,27 +18,28 @@ const StatusChart = ({ data }) => {
             statuses.add(item.Status);
         });
 
-        // Define specific order
+        // Define specific order requested by user
+        // "Tarefas pendentes Escalados Em andamento pronto para qa aguardando aprovação Bug report"
         const STATUS_ORDER = [
-            'Tarefas Pendentes', 'Tarefas pendentes', 'TAREFAS PENDENTES',
-            'Escalated', 'Escalados', 'ESCALATED',
-            'Em Andamento', 'Em andamento', 'EM ANDAMENTO',
-            'Pronto para QA', 'pronto para qa', 'PRONTO PARA QA',
-            'Aguardando Aprovação', 'aguardando aprovação', 'AGUARDANDO APROVAÇÃO',
-            'Bug Report', 'Bug report', 'BUG REPORT'
+            'Tarefas pendentes', 
+            'Escalados', 
+            'Em andamento', 
+            'pronto para qa', 
+            'aguardando aprovação', 
+            'Bug report'
         ];
 
         const sortedStatuses = Array.from(statuses).sort((a, b) => {
             const indexA = STATUS_ORDER.findIndex(s => s.toLowerCase() === a.toLowerCase());
             const indexB = STATUS_ORDER.findIndex(s => s.toLowerCase() === b.toLowerCase());
-            
+
             // If both are in the list, sort by index
             if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-            
+
             // If a is in list, it comes first
             if (indexA !== -1) return -1;
             if (indexB !== -1) return 1;
-            
+
             // Otherwise alphabetical
             return a.localeCompare(b);
         });
@@ -81,7 +82,7 @@ const StatusChart = ({ data }) => {
                             fill={colors[index % colors.length]} 
                             radius={[4, 4, 0, 0]}
                         >
-                            <LabelList dataKey={status} position="top" style={{ fill: '#64748B', fontSize: '11px' }} />
+                             <LabelList dataKey={status} position="top" style={{ fill: '#64748B', fontSize: '11px' }} />
                         </Bar>
                     ))}
                 </BarChart>

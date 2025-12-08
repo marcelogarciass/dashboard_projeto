@@ -169,7 +169,7 @@ def load_data_jira():
         jql = 'statusCategory != Done OR created >= -730d ORDER BY created DESC'
         
         # Adicionado campos extras para o novo dashboard
-        fields = "summary,assignee,status,created,project,customfield_10026,customfield_10020,duedate,priority,issuetype,resolutiondate,updated,timeoriginalestimate,timespent,components,labels"
+        fields = "summary,assignee,status,created,project,customfield_10031,customfield_10020,duedate,priority,issuetype,resolutiondate,updated,timeoriginalestimate,timespent,components,labels"
         
         # maxResults=0 garante retorno de TODOS os tickets (bypass paginação padrão)
         issues = jira.search_issues(jql, maxResults=0, fields=fields)
@@ -178,7 +178,7 @@ def load_data_jira():
         for issue in issues:
             # Extração segura de campos
             assignee = issue.fields.assignee.displayName if issue.fields.assignee else 'Não Atribuído'
-            story_points = getattr(issue.fields, 'customfield_10026', 0)
+            story_points = getattr(issue.fields, 'customfield_10031', 0)
             if story_points is None: story_points = 0
             
             # Parsing de Sprint

@@ -58,14 +58,14 @@ def get_data():
 
     print("Fetching data from Jira...")
     jql = 'statusCategory != Done OR created >= -730d ORDER BY created DESC'
-    fields = "summary,assignee,status,created,project,customfield_10026,customfield_10020,duedate,priority,issuetype,resolutiondate,updated,timeoriginalestimate,timespent,components,labels"
+    fields = "summary,assignee,status,created,project,customfield_10031,customfield_10020,duedate,priority,issuetype,resolutiondate,updated,timeoriginalestimate,timespent,components,labels"
     
     issues = jira.search_issues(jql, maxResults=0, fields=fields)
     
     data = []
     for issue in issues:
         assignee = issue.fields.assignee.displayName if issue.fields.assignee else 'Não Atribuído'
-        story_points = getattr(issue.fields, 'customfield_10026', 0) or 0
+        story_points = getattr(issue.fields, 'customfield_10031', 0) or 0
         sprint_field = getattr(issue.fields, 'customfield_10020', None)
         sprint_name = sprint_field[0].name if sprint_field else 'Backlog'
         
