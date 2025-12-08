@@ -134,6 +134,25 @@ st.markdown("""
         border-radius: 12px;
     }
 
+    /* Multiselect Tags - Modern Enterprise Style */
+    .stMultiSelect span[data-baseweb="tag"] {
+        background-color: #EFF6FF !important; /* Soft Blue Bg */
+        color: #1E40AF !important; /* Brand Blue Text */
+        border: 1px solid #BFDBFE; /* Subtle Border */
+        border-radius: 6px; /* Rounded */
+        transition: all 0.2s ease;
+    }
+    
+    .stMultiSelect span[data-baseweb="tag"]:hover {
+        background-color: #DBEAFE !important;
+        border-color: #60A5FA;
+    }
+    
+    /* Tag Close Button */
+    .stMultiSelect span[data-baseweb="tag"] span[role="presentation"] {
+        color: #1E40AF !important;
+    }
+
 </style>
 """, unsafe_allow_html=True) 
 
@@ -401,13 +420,13 @@ with tabs[0]:
                 'Concluído': '#1E3A8A', 'Done': '#1E3A8A', 'Finalizado': '#1E3A8A', 'Resolvido': '#1E3A8A', 'Closed': '#1E3A8A',
                 
                 # Em Andamento (Azul Médio/Vibrante)
-                'Em andamento': '#2563EB', 'In Progress': '#2563EB', 'Doing': '#2563EB',
+                'Em andamento': '#2563EB', 'In Progress': '#2563EB', 'Doing': '#2563EB', 'Em desenvolvimento': '#2563EB',
                 
                 # Pendentes/Backlog (Azul Claro/Suave)
-                'Tarefas pendentes': '#93C5FD', 'To Do': '#93C5FD', 'Backlog': '#BFDBFE', 'Open': '#BFDBFE',
+                'Tarefas pendentes': '#93C5FD', 'To Do': '#93C5FD', 'Backlog': '#BFDBFE', 'Open': '#BFDBFE', 'Aberto': '#BFDBFE',
                 
                 # Validação/QA (Azul Acinzentado)
-                'Pronto para QA': '#64748B', 'Test': '#64748B', 'Teste Cury': '#64748B', 'Homologação': '#64748B',
+                'Pronto para QA': '#64748B', 'Test': '#64748B', 'Teste Cury': '#64748B', 'Homologação': '#64748B', 'Homologacao': '#64748B',
                 
                 # Atenção/Crítico (Azul Noturno/Profundo - Mantendo a sobriedade)
                 'Escalated': '#0F172A', 'ESCALADO': '#0F172A', 'Blocked': '#0F172A', 'Impedimento': '#0F172A',
@@ -415,7 +434,7 @@ with tabs[0]:
                 
                 # Cancelados/Outros (Cinza Azulado)
                 'Cancelado': '#CBD5E1', 'Não procedente': '#CBD5E1', 'Não Procedente': '#CBD5E1', 
-                'Análise': '#60A5FA', 'Aguardando': '#93C5FD', 'Conta': '#2563EB'
+                'Análise': '#60A5FA', 'Aguardando': '#93C5FD', 'Conta': '#2563EB', 'Aguardando Aprovação': '#93C5FD'
             }
 
             projs = sorted(df_kanban['Projeto'].unique())
@@ -433,25 +452,40 @@ with tabs[0]:
                     s_counts = d_p['Status'].value_counts().reset_index()
                     s_counts.columns = ['Status', 'Qtd']
                     
-                    # Gráfico Individual
-                    fig_p = px.bar(s_counts, x='Qtd', y='Status', orientation='h', 
-                                   title=f"📁 {proj}", text_auto=True,
-                                   color='Status', 
-                                   color_discrete_map=color_map)
+                    # Gráfico Individual - Refatorado com Plotly Graph Objects
+                    fig_p = go.Figure()
+                    
+                    # Mapeamento de cores para lista
+                    bar_colors = [color_map.get(s, '#CBD5E1') for s in s_counts['Status']]
+                    
+                    fig_p.add_trace(go.Bar(
+                        y=s_counts['Status'],
+                        x=s_counts['Qtd'],
+                        orientation='h',
+                        text=s_counts['Qtd'],
+                        textposition='auto',
+                        marker_color=bar_colors,
+                        marker_line_width=0,
+                        hovertemplate='<b>%{y}</b>: %{x} issues<extra></extra>',
+                        width=0.7 # Barras mais finas e elegantes
+                    ))
                     
                     fig_p.update_layout(
+                        title=dict(
+                            text=f"📁 {proj}",
+                            font=dict(size=15, color="#1E3A8A", family="Inter")
+                        ),
                         template="plotly_white", 
                         paper_bgcolor='rgba(0,0,0,0)', 
                         plot_bgcolor='rgba(0,0,0,0)', 
                         font=dict(family="Inter", color="#111827"),
                         showlegend=False,
-                        height=250,
-                        margin=dict(l=0, r=0, t=40, b=0),
-                        xaxis=dict(showgrid=False, showticklabels=False),
-                        yaxis=dict(showgrid=False)
+                        height=220, # Compacto
+                        margin=dict(l=10, r=10, t=40, b=10),
+                        xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
+                        yaxis=dict(showgrid=False, tickfont=dict(size=11), automargin=True)
                     )
-                    fig_p.update_traces(marker_line_width=0, opacity=0.9)
-                    st.plotly_chart(fig_p, use_container_width=True)
+                    st.plotly_chart(fig_p, use_container_width=True, config={'displayModeBar': False})
         else:
             st.info("Nenhum dado disponível para exibir.")
 
@@ -470,23 +504,46 @@ with tabs[0]:
         timeline = pd.DataFrame({'Data': pd.concat([df_final['Criado'], df_final['Resolvido']]).unique()})
         timeline = timeline.sort_values('Data').dropna()
         
-        # Aproximação visual
+        # Aproximação visual - Refatorado
         fig_burn = go.Figure()
-        fig_burn.add_trace(go.Scatter(x=df_burn['Criado'], y=df_burn['Acum_Criado'], mode='lines', name='Escopo Total', line=dict(color='#1E40AF', width=3)))
+        
+        # Linha de Escopo (Azul Escuro Profundo)
+        fig_burn.add_trace(go.Scatter(
+            x=df_burn['Criado'], 
+            y=df_burn['Acum_Criado'], 
+            mode='lines', 
+            name='Escopo Total', 
+            line=dict(color='#1E3A8A', width=3),
+            hovertemplate='<b>Escopo</b>: %{y} issues<br>%{x|%d/%m/%Y}<extra></extra>'
+        ))
+        
         if not df_res_burn.empty:
              df_res_burn['Acum_Resolvido'] = range(1, len(df_res_burn) + 1)
-             fig_burn.add_trace(go.Scatter(x=df_res_burn['Resolvido'], y=df_res_burn['Acum_Resolvido'], mode='lines', name='Entregue', fill='tozeroy', line=dict(color='#93C5FD')))
+             # Linha de Entrega (Azul Vibrante com Preenchimento Suave)
+             fig_burn.add_trace(go.Scatter(
+                 x=df_res_burn['Resolvido'], 
+                 y=df_res_burn['Acum_Resolvido'], 
+                 mode='lines', 
+                 name='Entregue', 
+                 fill='tozeroy', 
+                 fillcolor='rgba(59, 130, 246, 0.1)', # Azul translúcido
+                 line=dict(color='#3B82F6', width=3),
+                 hovertemplate='<b>Entregue</b>: %{y} issues<br>%{x|%d/%m/%Y}<extra></extra>'
+             ))
         
         fig_burn.update_layout(
-            title="Curva de Entrega (Burnup)", 
+            title=dict(text="📉 Curva de Evolução (Burnup)", font=dict(size=18, color="#1E3A8A")),
             template="plotly_white", 
             paper_bgcolor='rgba(0,0,0,0)', 
             plot_bgcolor='rgba(0,0,0,0)', 
-            font=dict(family="Inter", color="#111827"),
-            xaxis=dict(showgrid=False),
-            yaxis=dict(showgrid=True, gridcolor='#E5E7EB', gridwidth=1)
+            font=dict(family="Inter", color="#64748B"),
+            hovermode="x unified",
+            xaxis=dict(showgrid=False, showline=True, linecolor="#E5E7EB"),
+            yaxis=dict(showgrid=True, gridcolor='#F1F5F9', gridwidth=1, zeroline=False),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            margin=dict(l=20, r=20, t=60, b=20)
         )
-        st.plotly_chart(fig_burn, use_container_width=True)
+        st.plotly_chart(fig_burn, use_container_width=True, config={'displayModeBar': False})
 
 # --- TAB 2: INDICADORES CHAVE (KPIs) ---
 with tabs[1]:
@@ -527,34 +584,65 @@ with tabs[1]:
     
     with c_k1:
         st.subheader("Distribuição por Tipo (Ativos)")
-        # Usar df_kanban para ver distribuição do trabalho atual
-        # Paleta monocromática azul para o Pie Chart
-        blues_palette = ['#1E40AF', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE']
-        fig_type = px.pie(df_kanban, names='Tipo', hole=0.6, title="Volume por Tipo de Demanda (Backlog)", color_discrete_sequence=blues_palette)
+        # Pie Chart Refatorado - Modern Donut
+        blues_palette = ['#1E3A8A', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE']
+        
+        fig_type = go.Figure(data=[go.Pie(
+            labels=df_kanban['Tipo'], 
+            hole=0.7, # Donut chart mais fino e elegante
+            marker=dict(colors=blues_palette, line=dict(color='#FFFFFF', width=2)),
+            textinfo='percent',
+            hoverinfo='label+value+percent',
+            textfont=dict(size=13, family="Inter", weight="bold"),
+            pull=[0.02] * len(df_kanban['Tipo'].unique()) # Leve separação
+        )])
+        
         fig_type.update_layout(
+            title=dict(text="Volume por Demanda", font=dict(size=16, color="#1E3A8A")),
             template="plotly_white", 
             paper_bgcolor='rgba(0,0,0,0)', 
             plot_bgcolor='rgba(0,0,0,0)', 
-            font=dict(family="Inter", color="#111827")
+            font=dict(family="Inter", color="#64748B"),
+            showlegend=True,
+            legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),
+            margin=dict(l=20, r=20, t=40, b=50),
+            height=350
         )
-        fig_type.update_traces(textinfo='percent+label', textfont_size=12, marker=dict(line=dict(color='#FFFFFF', width=2)))
-        st.plotly_chart(fig_type, use_container_width=True)
+        
+        # Adicionar anotação no centro com Total
+        total_items = len(df_kanban)
+        fig_type.add_annotation(text=f"<b>{total_items}</b><br>Items", x=0.5, y=0.5, font_size=20, showarrow=False, font_family="Inter", font_color="#1E3A8A")
+        
+        st.plotly_chart(fig_type, use_container_width=True, config={'displayModeBar': False})
         
     with c_k2:
         st.subheader("Funil de Status")
         status_counts = df_kanban['Status'].value_counts().reset_index()
         status_counts.columns = ['Status', 'Qtd']
-        # Funil em degradê de azul
-        fig_funnel = px.funnel(status_counts, y='Status', x='Qtd', title="Funil de Execução Total", color='Qtd', color_discrete_sequence=['#1E40AF'])
-        fig_funnel.update_traces(marker=dict(color='#2563EB', line=dict(color='#FFFFFF', width=1))) # Forçar azul corporativo
+        
+        # Funil Refatorado
+        fig_funnel = go.Figure(go.Funnel(
+            y=status_counts['Status'],
+            x=status_counts['Qtd'],
+            textinfo="value+percent initial",
+            textposition="inside",
+            marker=dict(color='#2563EB', line=dict(width=2, color="#FFFFFF")),
+            connector=dict(line=dict(color="#93C5FD", width=1, dash="dot")),
+            opacity=0.9,
+            hovertemplate='<b>%{y}</b>: %{x} issues<extra></extra>'
+        ))
+        
         fig_funnel.update_layout(
+            title=dict(text="Fluxo de Execução", font=dict(size=16, color="#1E3A8A")),
             template="plotly_white", 
             paper_bgcolor='rgba(0,0,0,0)', 
             plot_bgcolor='rgba(0,0,0,0)', 
-            font=dict(family="Inter", color="#111827"),
+            font=dict(family="Inter", color="#64748B"),
+            margin=dict(l=10, r=10, t=40, b=10),
+            height=350,
             showlegend=False
         )
-        st.plotly_chart(fig_funnel, use_container_width=True)
+        st.plotly_chart(fig_funnel, use_container_width=True, config={'displayModeBar': False})
 
 # --- TAB 3: PAINEL DE SPRINTS ---
 with tabs[2]:
@@ -579,19 +667,36 @@ with tabs[2]:
         m2.metric("Story Points Entregues", f"{sp_done:.0f}")
         m3.metric("Progresso Geral", f"{progress_sprint:.1f}%")
         
-        # Gráfico de Barras por Sprint
-        fig_sprint_bar = px.bar(df_sprint_view.groupby(['Sprint', 'Status']).sum(numeric_only=True).reset_index(), 
-                                x='Sprint', y='Story Points', color='Status', title="Story Points por Sprint e Status", barmode='group',
-                                color_discrete_sequence=['#BFDBFE', '#93C5FD', '#60A5FA', '#3B82F6', '#2563EB'])
+        # Gráfico de Barras por Sprint - Refatorado com Cores Consistentes
+        sprint_data = df_sprint_view.groupby(['Sprint', 'Status']).sum(numeric_only=True).reset_index()
+        
+        fig_sprint_bar = go.Figure()
+        
+        for status in sprint_data['Status'].unique():
+            d = sprint_data[sprint_data['Status'] == status]
+            fig_sprint_bar.add_trace(go.Bar(
+                x=d['Sprint'],
+                y=d['Story Points'],
+                name=status,
+                marker_color=color_map.get(status, '#94A3B8'),
+                text=d['Story Points'],
+                textposition='auto',
+                hovertemplate='<b>%{x}</b><br>%{y} SP<extra></extra>'
+            ))
+            
         fig_sprint_bar.update_layout(
+            title=dict(text="Story Points por Sprint", font=dict(size=18, color="#1E3A8A")),
             template="plotly_white", 
             paper_bgcolor='rgba(0,0,0,0)', 
             plot_bgcolor='rgba(0,0,0,0)', 
-            font=dict(family="Inter", color="#111827"),
-            xaxis=dict(showgrid=False),
-            yaxis=dict(showgrid=True, gridcolor='#E5E7EB')
+            font=dict(family="Inter", color="#64748B"),
+            barmode='group',
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            xaxis=dict(showgrid=False, linecolor='#E2E8F0'),
+            yaxis=dict(showgrid=True, gridcolor='#F1F5F9', zeroline=False),
+            margin=dict(l=20, r=20, t=60, b=20)
         )
-        st.plotly_chart(fig_sprint_bar, use_container_width=True)
+        st.plotly_chart(fig_sprint_bar, use_container_width=True, config={'displayModeBar': False})
 
 # --- TAB 4: GESTÃO DE TAREFAS ---
 with tabs[3]:
@@ -649,18 +754,44 @@ with tabs[4]:
         team_load.columns = ['Responsável', 'Qtd Issues', 'Story Points']
         team_load = team_load.sort_values('Story Points', ascending=True)
         
-        fig_team = px.bar(team_load, y='Responsável', x=['Qtd Issues', 'Story Points'], orientation='h', 
-                          title="Carga por Membro", barmode='group',
-                          color_discrete_sequence=['#1E40AF', '#93C5FD'])
+        fig_team = go.Figure()
+        
+        fig_team.add_trace(go.Bar(
+            y=team_load['Responsável'],
+            x=team_load['Qtd Issues'],
+            name='Qtd Issues',
+            orientation='h',
+            marker_color='#93C5FD',
+            text=team_load['Qtd Issues'],
+            textposition='auto',
+            hovertemplate='<b>%{y}</b><br>%{x} Issues<extra></extra>'
+        ))
+        
+        fig_team.add_trace(go.Bar(
+            y=team_load['Responsável'],
+            x=team_load['Story Points'],
+            name='Story Points',
+            orientation='h',
+            marker_color='#1E40AF',
+            text=team_load['Story Points'],
+            textposition='auto',
+            hovertemplate='<b>%{y}</b><br>%{x} SP<extra></extra>'
+        ))
+        
         fig_team.update_layout(
+            title=dict(text="Carga por Membro", font=dict(size=18, color="#1E3A8A")),
             template="plotly_white", 
             paper_bgcolor='rgba(0,0,0,0)', 
             plot_bgcolor='rgba(0,0,0,0)', 
-            font=dict(family="Inter", color="#111827"),
-            xaxis=dict(showgrid=True, gridcolor='#E5E7EB'),
-            yaxis=dict(showgrid=False)
+            font=dict(family="Inter", color="#64748B"),
+            barmode='group',
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            xaxis=dict(showgrid=True, gridcolor='#F1F5F9', zeroline=False),
+            yaxis=dict(showgrid=False),
+            height=400,
+            margin=dict(l=20, r=20, t=60, b=20)
         )
-        st.plotly_chart(fig_team, use_container_width=True)
+        st.plotly_chart(fig_team, use_container_width=True, config={'displayModeBar': False})
         
         # Alerta de Burnout (Ex: > 10 issues ou > 20 points - Ajustável)
         overloaded = team_load[(team_load['Qtd Issues'] > 10) | (team_load['Story Points'] > 20)]
@@ -681,16 +812,33 @@ with tabs[5]:
             df_atrasos = df_final[df_final['Atrasado'] == True]
             if not df_atrasos.empty:
                 heatmap_data = df_atrasos.groupby(['Módulo', 'Status']).size().reset_index(name='Qtd')
-                fig_heat = px.density_heatmap(heatmap_data, x='Status', y='Módulo', z='Qtd', title="Concentração de Atrasos", color_continuous_scale='Blues')
+                
+                # Pivot para formato matricial correto para Heatmap
+                matrix = heatmap_data.pivot(index='Módulo', columns='Status', values='Qtd').fillna(0)
+                
+                fig_heat = go.Figure(data=go.Heatmap(
+                    z=matrix.values,
+                    x=matrix.columns,
+                    y=matrix.index,
+                    colorscale='Blues',
+                    hovertemplate='<b>%{y}</b><br>%{x}: %{z} atrasos<extra></extra>',
+                    showscale=True,
+                    xgap=2, # Espaçamento entre células
+                    ygap=2
+                ))
+                
                 fig_heat.update_layout(
+                    title=dict(text="Concentração de Atrasos", font=dict(size=16, color="#1E3A8A")),
                     template="plotly_white", 
                     paper_bgcolor='rgba(0,0,0,0)', 
                     plot_bgcolor='rgba(0,0,0,0)', 
-                    font=dict(family="Inter", color="#111827"),
-                    xaxis=dict(showgrid=False),
-                    yaxis=dict(showgrid=False)
+                    font=dict(family="Inter", color="#64748B"),
+                    xaxis=dict(showgrid=False, title=None, side="top"), # Labels no topo
+                    yaxis=dict(showgrid=False, title=None, automargin=True),
+                    height=350,
+                    margin=dict(l=10, r=10, t=60, b=10)
                 )
-                st.plotly_chart(fig_heat, use_container_width=True)
+                st.plotly_chart(fig_heat, use_container_width=True, config={'displayModeBar': False})
             else:
                 st.success("Sem itens atrasados para gerar heatmap.")
     
@@ -715,17 +863,33 @@ with tabs[5]:
         if not df_risk_proj.empty:
             df_risk_proj = df_risk_proj.sort_values('Qtd Atrasos', ascending=False).head(10)
             
-            fig_risk_proj = px.bar(df_risk_proj, x='Qtd Atrasos', y='Projeto', orientation='h', 
-                                   title="Top 10 Projetos com Atrasos", text='Qtd Atrasos', color='Qtd Atrasos', color_continuous_scale='Reds')
+            # Gráfico Refatorado - Top Atrasos
+            fig_risk_proj = go.Figure(go.Bar(
+                x=df_risk_proj['Qtd Atrasos'], 
+                y=df_risk_proj['Projeto'], 
+                orientation='h',
+                marker=dict(
+                    color=df_risk_proj['Qtd Atrasos'],
+                    colorscale='Reds',
+                    line=dict(color='rgba(255, 255, 255, 0.5)', width=1)
+                ),
+                text=df_risk_proj['Qtd Atrasos'],
+                textposition='auto',
+                hovertemplate='<b>%{y}</b><br>%{x} atrasos<extra></extra>'
+            ))
+            
             fig_risk_proj.update_layout(
+                title=dict(text="Top 10 Projetos com Atrasos", font=dict(size=16, color="#991B1B")), # Vermelho Escuro
                 template="plotly_white", 
                 paper_bgcolor='rgba(0,0,0,0)', 
                 plot_bgcolor='rgba(0,0,0,0)', 
-                font=dict(family="Inter", color="#111827"),
-                xaxis=dict(showgrid=True, gridcolor='#E5E7EB'),
-                yaxis=dict(showgrid=False)
+                font=dict(family="Inter", color="#64748B"),
+                xaxis=dict(showgrid=True, gridcolor='#FEE2E2', zeroline=False), # Grid vermelho claro
+                yaxis=dict(showgrid=False, automargin=True),
+                margin=dict(l=10, r=10, t=40, b=10),
+                height=350
             )
-            st.plotly_chart(fig_risk_proj, use_container_width=True)
+            st.plotly_chart(fig_risk_proj, use_container_width=True, config={'displayModeBar': False})
         else:
             st.info("Nenhum projeto com atrasos registrados.")
 
