@@ -138,7 +138,8 @@ def load_data_jira():
         # Adicionado campos extras para o novo dashboard
         fields = "summary,assignee,status,created,project,customfield_10026,customfield_10020,duedate,priority,issuetype,resolutiondate,updated,timeoriginalestimate,timespent,components,labels"
         
-        issues = jira.search_issues(jql, maxResults=None, fields=fields)
+        # maxResults=0 garante retorno de TODOS os tickets (bypass paginação padrão)
+        issues = jira.search_issues(jql, maxResults=0, fields=fields)
         
         data = []
         for issue in issues:
@@ -385,8 +386,14 @@ with tabs[0]:
             
             for i, proj in enumerate(projs):
                 with cols[i % 2]:
-                    # Filtrar dados do projeto
-                    d_p = df_final[df_final['Projeto'] == proj]
+                    # Filtrar dados do projeto (Usar df_kanban para ver TODO o backlog, sem filtro de data de criação)
+                    # Mas precisamos aplicar os outros filtros (Status, Tipo, etc) que já estão em df_kanban
+                    d_p = df_kanban[df_kanban['Projeto'] == proj]
+                    
+                    if d_p.empty:
+                        st.caption(f"Sem dados para {proj}")
+                        continue
+
                     # Contagem por status
                     s_counts = d_p['Status'].value_counts().reset_index()
                     s_counts.columns = ['Status', 'Qtd']
