@@ -381,15 +381,27 @@ with tabs[0]:
         st.subheader("📌 Status Detalhado por Projeto")
         
         if not df_kanban.empty:
-            # Color Map para Status (Padronização Visual)
+            # Color Map Monocromático (Tons de Azul - Clean & Corporate)
             color_map = {
-                'Concluído': '#36B37E', 'Done': '#36B37E', 'Finalizado': '#36B37E', 'Resolvido': '#36B37E', 'Closed': '#36B37E',
-                'Em andamento': '#0052CC', 'In Progress': '#0052CC', 'Doing': '#0052CC',
-                'Tarefas pendentes': '#42526E', 'To Do': '#42526E', 'Backlog': '#42526E', 'Open': '#42526E',
-                'Escalated': '#FF5630', 'ESCALADO': '#FF5630', 'Blocked': '#FF5630', 'Impedimento': '#FF5630',
-                'Bug Report': '#DE350B', 'Bug': '#DE350B',
-                'Pronto para QA': '#8777D9', 'Test': '#8777D9', 'Teste Cury': '#8777D9', 'Homologação': '#8777D9',
-                'Cancelado': '#172B4D', 'Não procedente': '#172B4D', 'Não Procedente': '#172B4D'
+                # Concluídos (Azul Escuro/Sólido)
+                'Concluído': '#1E3A8A', 'Done': '#1E3A8A', 'Finalizado': '#1E3A8A', 'Resolvido': '#1E3A8A', 'Closed': '#1E3A8A',
+                
+                # Em Andamento (Azul Médio/Vibrante)
+                'Em andamento': '#2563EB', 'In Progress': '#2563EB', 'Doing': '#2563EB',
+                
+                # Pendentes/Backlog (Azul Claro/Suave)
+                'Tarefas pendentes': '#93C5FD', 'To Do': '#93C5FD', 'Backlog': '#BFDBFE', 'Open': '#BFDBFE',
+                
+                # Validação/QA (Azul Acinzentado)
+                'Pronto para QA': '#64748B', 'Test': '#64748B', 'Teste Cury': '#64748B', 'Homologação': '#64748B',
+                
+                # Atenção/Crítico (Azul Noturno/Profundo - Mantendo a sobriedade)
+                'Escalated': '#0F172A', 'ESCALADO': '#0F172A', 'Blocked': '#0F172A', 'Impedimento': '#0F172A',
+                'Bug Report': '#172554', 'Bug': '#172554',
+                
+                # Cancelados/Outros (Cinza Azulado)
+                'Cancelado': '#CBD5E1', 'Não procedente': '#CBD5E1', 'Não Procedente': '#CBD5E1', 
+                'Análise': '#60A5FA', 'Aguardando': '#93C5FD', 'Conta': '#2563EB'
             }
 
             projs = sorted(df_kanban['Projeto'].unique())
@@ -444,10 +456,10 @@ with tabs[0]:
         
         # Aproximação visual
         fig_burn = go.Figure()
-        fig_burn.add_trace(go.Scatter(x=df_burn['Criado'], y=df_burn['Acum_Criado'], mode='lines', name='Escopo Total', line=dict(color='#ff0055')))
+        fig_burn.add_trace(go.Scatter(x=df_burn['Criado'], y=df_burn['Acum_Criado'], mode='lines', name='Escopo Total', line=dict(color='#1E3A8A', width=3)))
         if not df_res_burn.empty:
              df_res_burn['Acum_Resolvido'] = range(1, len(df_res_burn) + 1)
-             fig_burn.add_trace(go.Scatter(x=df_res_burn['Resolvido'], y=df_res_burn['Acum_Resolvido'], mode='lines', name='Entregue', fill='tozeroy', line=dict(color='#00f3ff')))
+             fig_burn.add_trace(go.Scatter(x=df_res_burn['Resolvido'], y=df_res_burn['Acum_Resolvido'], mode='lines', name='Entregue', fill='tozeroy', line=dict(color='#3B82F6')))
         
         fig_burn.update_layout(title="Curva de Entrega (Burnup)", template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
         st.plotly_chart(fig_burn, use_container_width=True)
@@ -492,7 +504,9 @@ with tabs[1]:
     with c_k1:
         st.subheader("Distribuição por Tipo (Ativos)")
         # Usar df_kanban para ver distribuição do trabalho atual
-        fig_type = px.pie(df_kanban, names='Tipo', hole=0.6, title="Volume por Tipo de Demanda (Backlog)", color_discrete_sequence=px.colors.sequential.Plasma)
+        # Paleta monocromática azul para o Pie Chart
+        blues_palette = ['#1E3A8A', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE']
+        fig_type = px.pie(df_kanban, names='Tipo', hole=0.6, title="Volume por Tipo de Demanda (Backlog)", color_discrete_sequence=blues_palette)
         fig_type.update_layout(template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
         st.plotly_chart(fig_type, use_container_width=True)
         
@@ -500,7 +514,9 @@ with tabs[1]:
         st.subheader("Funil de Status")
         status_counts = df_kanban['Status'].value_counts().reset_index()
         status_counts.columns = ['Status', 'Qtd']
-        fig_funnel = px.funnel(status_counts, y='Status', x='Qtd', title="Funil de Execução Total", color='Qtd', color_discrete_sequence=['#00f3ff'])
+        # Funil em degradê de azul
+        fig_funnel = px.funnel(status_counts, y='Status', x='Qtd', title="Funil de Execução Total", color='Qtd', color_discrete_sequence=['#1E3A8A'])
+        fig_funnel.update_traces(marker=dict(color='#2563EB')) # Forçar azul corporativo
         fig_funnel.update_layout(template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
         st.plotly_chart(fig_funnel, use_container_width=True)
 
