@@ -20,17 +20,17 @@ const StatusChart = ({ data }) => {
 
         // Define specific order
         const STATUS_ORDER = [
-            'Tarefas Pendentes', 
-            'Escalated', 
-            'Em Andamento', 
-            'Pronto para QA', 
-            'Aguardando Aprovação', 
-            'Bug Report'
+            'Tarefas Pendentes', 'Tarefas pendentes', 'TAREFAS PENDENTES',
+            'Escalated', 'Escalados', 'ESCALATED',
+            'Em Andamento', 'Em andamento', 'EM ANDAMENTO',
+            'Pronto para QA', 'pronto para qa', 'PRONTO PARA QA',
+            'Aguardando Aprovação', 'aguardando aprovação', 'AGUARDANDO APROVAÇÃO',
+            'Bug Report', 'Bug report', 'BUG REPORT'
         ];
 
         const sortedStatuses = Array.from(statuses).sort((a, b) => {
-            const indexA = STATUS_ORDER.indexOf(a);
-            const indexB = STATUS_ORDER.indexOf(b);
+            const indexA = STATUS_ORDER.findIndex(s => s.toLowerCase() === a.toLowerCase());
+            const indexB = STATUS_ORDER.findIndex(s => s.toLowerCase() === b.toLowerCase());
             
             // If both are in the list, sort by index
             if (indexA !== -1 && indexB !== -1) return indexA - indexB;
