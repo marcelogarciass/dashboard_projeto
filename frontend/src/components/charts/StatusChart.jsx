@@ -6,8 +6,11 @@ const StatusChart = ({ data }) => {
         if (!data) return [];
         const pivoted = {};
         const statuses = new Set();
+        const STATUS_DONE = ['Concluído', 'Done', 'Finalizado', 'Resolvido', 'Closed'];
 
         data.forEach(item => {
+            if (STATUS_DONE.includes(item.Status)) return;
+
             if (!pivoted[item.Projeto]) {
                 pivoted[item.Projeto] = { name: item.Projeto };
             }
