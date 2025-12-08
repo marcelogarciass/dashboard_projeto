@@ -71,7 +71,7 @@ function App() {
       <main className="flex-1 overflow-y-auto p-8">
         <header className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Executive Dashboard</h1>
+            <h1 className="text-3xl font-bold text-slate-800 tracking-tight">FFID Dashboard</h1>
             <p className="text-slate-500 mt-1">Visão estratégica e operacional do portfólio</p>
           </div>
           <div className="text-sm text-slate-400">

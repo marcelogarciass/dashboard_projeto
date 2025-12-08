@@ -48,7 +48,8 @@ const Sidebar = ({ availableFilters, selectedFilters, onFilterChange }) => {
       <div className="p-6 border-b border-slate-100 flex items-center gap-3">
         <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-white font-bold shadow-sm p-1.5">
             <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-              <path d="M11.53 2c0-1.1-.9-2-2-2H2C.9 0 0 .9 0 2v8c0 1.1.9 2 2 2h7.53c1.1 0 2-.9 2-2V2zm12.47 10c0-1.1-.9-2-2-2h-7.53c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2H22c1.1 0 2-.9 2-2v-8zm-12.47 0c0-1.1-.9-2-2-2H2c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h7.53c1.1 0 2-.9 2-2v-8z" />
+              <path d="M11.53 2c0-1.1-.9-2-2-2H2C.9 0 0 .9 0 2v8c0 1.1.9 2 2 2h7.53c1.1 0 2-.9 2-2V2zm12.47 10c0-1.1-.9-2-2-2h-7.53c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2H22c1.1 0 2-.9 2-2v-8zm-12.47 0c0-1.1-.9-2-2-2H2c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h7.53c1.1 0 2-.9 2-2v8c0 1.1.9 2 2 2h7.53c1.1 0 2-.9 2-2v-8z" className="hidden" /> {/* Legacy Block Logo */}
+              <path d="M14.65 0l-5.6 5.6c-.78.78-.78 2.05 0 2.83l5.6 5.6c.78.78 2.05.78 2.83 0l5.6-5.6c.78-.78.78-2.05 0-2.83l-5.6-5.6c-.78-.79-2.05-.79-2.83 0zm-8.24 6.41L.81 12.01c-.78.78-.78 2.05 0 2.83l5.6 5.6c.78.78 2.05.78 2.83 0l5.6-5.6c.78-.78.78-2.05 0-2.83l-5.6-5.6c-.78-.79-2.04-.79-2.83 0z" />
             </svg>
         </div>
         <span className="font-bold text-lg text-slate-800 tracking-tight">Jira Analytics</span>

@@ -19,10 +19,10 @@ const StatusChart = ({ data }) => {
         });
 
         // Define specific order requested by user
-        // "Tarefas pendentes Escalados Em andamento pronto para qa aguardando aprovação Bug report"
         const STATUS_ORDER = [
             'Tarefas pendentes', 
             'Escalados', 
+            'Escalated',
             'Em andamento', 
             'pronto para qa', 
             'aguardando aprovação', 
@@ -30,17 +30,16 @@ const StatusChart = ({ data }) => {
         ];
 
         const sortedStatuses = Array.from(statuses).sort((a, b) => {
-            const indexA = STATUS_ORDER.findIndex(s => s.toLowerCase() === a.toLowerCase());
-            const indexB = STATUS_ORDER.findIndex(s => s.toLowerCase() === b.toLowerCase());
+            const normA = a.trim().toLowerCase();
+            const normB = b.trim().toLowerCase();
+            
+            const indexA = STATUS_ORDER.findIndex(s => s.toLowerCase() === normA);
+            const indexB = STATUS_ORDER.findIndex(s => s.toLowerCase() === normB);
 
-            // If both are in the list, sort by index
             if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-
-            // If a is in list, it comes first
             if (indexA !== -1) return -1;
             if (indexB !== -1) return 1;
 
-            // Otherwise alphabetical
             return a.localeCompare(b);
         });
 
