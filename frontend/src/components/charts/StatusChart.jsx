@@ -28,13 +28,15 @@ const StatusChart = ({ data }) => {
     return (
         <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={processedData.chartData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
-                    <XAxis type="number" hide />
-                    <YAxis 
+                <BarChart data={processedData.chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis 
                         dataKey="name" 
-                        type="category" 
-                        width={100}
+                        tick={{fontSize: 11, fill: '#64748B'}} 
+                        tickLine={false}
+                        axisLine={false}
+                    />
+                    <YAxis 
                         tick={{fontSize: 11, fill: '#64748B'}} 
                         tickLine={false}
                         axisLine={false}
@@ -48,10 +50,8 @@ const StatusChart = ({ data }) => {
                         <Bar 
                             key={status} 
                             dataKey={status} 
-                            stackId="a" 
                             fill={colors[index % colors.length]} 
-                            radius={[0, 4, 4, 0]}
-                            barSize={20}
+                            radius={[4, 4, 0, 0]}
                         />
                     ))}
                 </BarChart>
