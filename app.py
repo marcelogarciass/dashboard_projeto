@@ -11,7 +11,7 @@ import base64
 # --- Configuração da Página ---
 st.set_page_config(page_title="Gestão de Projetos & Eficiência", layout="wide", page_icon="📈")
 
-# --- Custom CSS (Clean Corporate Theme) ---
+# --- Custom CSS (Modern Enterprise SaaS Theme) ---
 st.markdown("""
 <!-- Tailwind CDN & Config -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -20,9 +20,9 @@ st.markdown("""
       theme: {
         extend: {
           colors: {
-            'brand-blue': '#0047AB', /* Cobalt Blue - Strong Corporate */
-            'brand-bg': '#F4F5F7',   /* Light Gray Background */
-            'brand-text': '#172B4D', /* Dark Navy Text */
+            'brand-blue': '#1E40AF', /* Inter Blue - Professional */
+            'brand-bg': '#F8F9FA',   /* Off-white Background */
+            'brand-text': '#111827', /* Dark Gray Text */
             'card-bg': '#FFFFFF',
           },
           fontFamily: {
@@ -39,8 +39,8 @@ st.markdown("""
 
     /* Streamlit Global Overrides */
     .stApp {
-        background-color: #F4F5F7;
-        color: #172B4D;
+        background-color: #F8F9FA;
+        color: #111827;
         font-family: 'Inter', sans-serif;
     }
 
@@ -48,78 +48,92 @@ st.markdown("""
     h1, h2, h3 {
         font-family: 'Inter', sans-serif !important;
         font-weight: 700;
-        color: #0047AB;
+        color: #111827;
         text-transform: none;
-        letter-spacing: normal;
+        letter-spacing: -0.02em; /* Tighter tracking for modern look */
         background: none;
         -webkit-text-fill-color: initial;
         text-shadow: none;
     }
     
-    /* Metrics Cards - Clean White Style */
+    /* Metrics Cards - Soft Shadow & Depth */
     div[data-testid="stMetric"] {
         background: #FFFFFF;
-        border: 1px solid #DFE1E6;
-        border-left: 4px solid #0047AB;
-        border-radius: 8px;
-        padding: 15px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #E5E7EB; /* Subtle Border */
+        border-radius: 12px; /* More rounded */
+        padding: 20px; /* More whitespace */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); /* Soft Shadow */
         transition: all 0.2s ease;
     }
     
     div[data-testid="stMetric"]:hover {
-        border-color: #0047AB;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
+        border-color: #D1D5DB;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+        transform: translateY(-1px);
     }
     
     div[data-testid="stMetric"] label {
-        color: #5E6C84 !important;
+        color: #6B7280 !important; /* Secondary Gray */
         font-family: 'Inter', sans-serif;
-        font-size: 0.85rem;
+        font-size: 0.875rem;
         font-weight: 500;
     }
     
     div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
-        color: #172B4D !important;
+        color: #111827 !important; /* Primary Dark */
         font-family: 'Inter', sans-serif;
-        font-weight: 600;
-        text-shadow: none;
+        font-weight: 700; /* Bold numbers */
+        font-size: 1.8rem;
     }
 
-    /* Tabs - Pills Style */
+    /* Tabs - Clean Modern Style */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 24px;
         background-color: transparent;
-        padding: 0;
+        padding: 0 0 8px 0;
         border-radius: 0;
-        border-bottom: 2px solid #DFE1E6;
+        border-bottom: 1px solid #E5E7EB;
     }
     
     .stTabs [data-baseweb="tab"] {
-        height: 40px;
-        border-radius: 4px;
-        color: #5E6C84;
+        height: 48px;
+        border-radius: 6px;
+        color: #6B7280;
         font-family: 'Inter', sans-serif;
         font-size: 14px;
         font-weight: 500;
         border: none;
         background-color: transparent;
         transition: all 0.2s;
+        padding: 0 16px;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: #E6F0FF;
-        color: #0047AB !important;
-        border-bottom: 2px solid #0047AB;
-        border-radius: 4px 4px 0 0;
+        background-color: transparent;
+        color: #1E40AF !important; /* Indigo/Blue */
+        border-bottom: 2px solid #1E40AF;
+        border-radius: 0;
+        font-weight: 600;
     }
     
-    /* Adjust Sidebar to match */
+    /* Adjust Sidebar */
     [data-testid="stSidebar"] {
         background-color: #FFFFFF;
-        border-right: 1px solid #DFE1E6;
+        border-right: 1px solid #E5E7EB;
     }
+    
+    /* Input/Select Fields */
+    .stSelectbox div[data-baseweb="select"] > div {
+        border-radius: 8px;
+        border-color: #E5E7EB;
+        background-color: #FFFFFF;
+    }
+    
+    /* Chart Containers */
+    .js-plotly-plot {
+        border-radius: 12px;
+    }
+
 </style>
 """, unsafe_allow_html=True) 
 
@@ -423,18 +437,20 @@ with tabs[0]:
                     fig_p = px.bar(s_counts, x='Qtd', y='Status', orientation='h', 
                                    title=f"📁 {proj}", text_auto=True,
                                    color='Status', 
-                                   color_discrete_map=color_map,
-                                   color_discrete_sequence=px.colors.qualitative.Dark24)
+                                   color_discrete_map=color_map)
                     
                     fig_p.update_layout(
                         template="plotly_white", 
                         paper_bgcolor='rgba(0,0,0,0)', 
                         plot_bgcolor='rgba(0,0,0,0)', 
-                        font=dict(family="Inter"),
+                        font=dict(family="Inter", color="#111827"),
                         showlegend=False,
                         height=250,
-                        margin=dict(l=0, r=0, t=40, b=0)
+                        margin=dict(l=0, r=0, t=40, b=0),
+                        xaxis=dict(showgrid=False, showticklabels=False),
+                        yaxis=dict(showgrid=False)
                     )
+                    fig_p.update_traces(marker_line_width=0, opacity=0.9)
                     st.plotly_chart(fig_p, use_container_width=True)
         else:
             st.info("Nenhum dado disponível para exibir.")
@@ -456,12 +472,20 @@ with tabs[0]:
         
         # Aproximação visual
         fig_burn = go.Figure()
-        fig_burn.add_trace(go.Scatter(x=df_burn['Criado'], y=df_burn['Acum_Criado'], mode='lines', name='Escopo Total', line=dict(color='#1E3A8A', width=3)))
+        fig_burn.add_trace(go.Scatter(x=df_burn['Criado'], y=df_burn['Acum_Criado'], mode='lines', name='Escopo Total', line=dict(color='#1E40AF', width=3)))
         if not df_res_burn.empty:
              df_res_burn['Acum_Resolvido'] = range(1, len(df_res_burn) + 1)
-             fig_burn.add_trace(go.Scatter(x=df_res_burn['Resolvido'], y=df_res_burn['Acum_Resolvido'], mode='lines', name='Entregue', fill='tozeroy', line=dict(color='#3B82F6')))
+             fig_burn.add_trace(go.Scatter(x=df_res_burn['Resolvido'], y=df_res_burn['Acum_Resolvido'], mode='lines', name='Entregue', fill='tozeroy', line=dict(color='#93C5FD')))
         
-        fig_burn.update_layout(title="Curva de Entrega (Burnup)", template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
+        fig_burn.update_layout(
+            title="Curva de Entrega (Burnup)", 
+            template="plotly_white", 
+            paper_bgcolor='rgba(0,0,0,0)', 
+            plot_bgcolor='rgba(0,0,0,0)', 
+            font=dict(family="Inter", color="#111827"),
+            xaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=True, gridcolor='#E5E7EB', gridwidth=1)
+        )
         st.plotly_chart(fig_burn, use_container_width=True)
 
 # --- TAB 2: INDICADORES CHAVE (KPIs) ---
@@ -505,9 +529,15 @@ with tabs[1]:
         st.subheader("Distribuição por Tipo (Ativos)")
         # Usar df_kanban para ver distribuição do trabalho atual
         # Paleta monocromática azul para o Pie Chart
-        blues_palette = ['#1E3A8A', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE']
+        blues_palette = ['#1E40AF', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE']
         fig_type = px.pie(df_kanban, names='Tipo', hole=0.6, title="Volume por Tipo de Demanda (Backlog)", color_discrete_sequence=blues_palette)
-        fig_type.update_layout(template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
+        fig_type.update_layout(
+            template="plotly_white", 
+            paper_bgcolor='rgba(0,0,0,0)', 
+            plot_bgcolor='rgba(0,0,0,0)', 
+            font=dict(family="Inter", color="#111827")
+        )
+        fig_type.update_traces(textinfo='percent+label', textfont_size=12, marker=dict(line=dict(color='#FFFFFF', width=2)))
         st.plotly_chart(fig_type, use_container_width=True)
         
     with c_k2:
@@ -515,9 +545,15 @@ with tabs[1]:
         status_counts = df_kanban['Status'].value_counts().reset_index()
         status_counts.columns = ['Status', 'Qtd']
         # Funil em degradê de azul
-        fig_funnel = px.funnel(status_counts, y='Status', x='Qtd', title="Funil de Execução Total", color='Qtd', color_discrete_sequence=['#1E3A8A'])
-        fig_funnel.update_traces(marker=dict(color='#2563EB')) # Forçar azul corporativo
-        fig_funnel.update_layout(template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
+        fig_funnel = px.funnel(status_counts, y='Status', x='Qtd', title="Funil de Execução Total", color='Qtd', color_discrete_sequence=['#1E40AF'])
+        fig_funnel.update_traces(marker=dict(color='#2563EB', line=dict(color='#FFFFFF', width=1))) # Forçar azul corporativo
+        fig_funnel.update_layout(
+            template="plotly_white", 
+            paper_bgcolor='rgba(0,0,0,0)', 
+            plot_bgcolor='rgba(0,0,0,0)', 
+            font=dict(family="Inter", color="#111827"),
+            showlegend=False
+        )
         st.plotly_chart(fig_funnel, use_container_width=True)
 
 # --- TAB 3: PAINEL DE SPRINTS ---
@@ -546,8 +582,15 @@ with tabs[2]:
         # Gráfico de Barras por Sprint
         fig_sprint_bar = px.bar(df_sprint_view.groupby(['Sprint', 'Status']).sum(numeric_only=True).reset_index(), 
                                 x='Sprint', y='Story Points', color='Status', title="Story Points por Sprint e Status", barmode='group',
-                                color_discrete_sequence=px.colors.qualitative.Pastel)
-        fig_sprint_bar.update_layout(template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
+                                color_discrete_sequence=['#BFDBFE', '#93C5FD', '#60A5FA', '#3B82F6', '#2563EB'])
+        fig_sprint_bar.update_layout(
+            template="plotly_white", 
+            paper_bgcolor='rgba(0,0,0,0)', 
+            plot_bgcolor='rgba(0,0,0,0)', 
+            font=dict(family="Inter", color="#111827"),
+            xaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=True, gridcolor='#E5E7EB')
+        )
         st.plotly_chart(fig_sprint_bar, use_container_width=True)
 
 # --- TAB 4: GESTÃO DE TAREFAS ---
@@ -575,9 +618,9 @@ with tabs[3]:
             for _, item in items.iterrows():
                 priority_color = "🔴" if item['Prioridade'] in ['High', 'Highest', 'Critical'] else "🔵"
                 st.markdown(f"""
-                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-bottom: 10px; border-left: 3px solid #555;">
-                    <small style="color: #aaa;">{item['Chave']} | {item['Responsável']}</small><br>
-                    {priority_color} {item['Resumo'][:50]}...
+                <div style="background: #FFFFFF; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #E5E7EB; border-left: 4px solid #3B82F6; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    <small style="color: #6B7280; font-weight: 500;">{item['Chave']} | {item['Responsável']}</small><br>
+                    <span style="color: #111827; font-weight: 600;">{item['Resumo'][:50]}...</span>
                 </div>
                 """, unsafe_allow_html=True)
     
@@ -608,8 +651,15 @@ with tabs[4]:
         
         fig_team = px.bar(team_load, y='Responsável', x=['Qtd Issues', 'Story Points'], orientation='h', 
                           title="Carga por Membro", barmode='group',
-                          color_discrete_sequence=['#00f3ff', '#bc13fe'])
-        fig_team.update_layout(template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
+                          color_discrete_sequence=['#1E40AF', '#93C5FD'])
+        fig_team.update_layout(
+            template="plotly_white", 
+            paper_bgcolor='rgba(0,0,0,0)', 
+            plot_bgcolor='rgba(0,0,0,0)', 
+            font=dict(family="Inter", color="#111827"),
+            xaxis=dict(showgrid=True, gridcolor='#E5E7EB'),
+            yaxis=dict(showgrid=False)
+        )
         st.plotly_chart(fig_team, use_container_width=True)
         
         # Alerta de Burnout (Ex: > 10 issues ou > 20 points - Ajustável)
@@ -631,8 +681,15 @@ with tabs[5]:
             df_atrasos = df_final[df_final['Atrasado'] == True]
             if not df_atrasos.empty:
                 heatmap_data = df_atrasos.groupby(['Módulo', 'Status']).size().reset_index(name='Qtd')
-                fig_heat = px.density_heatmap(heatmap_data, x='Status', y='Módulo', z='Qtd', title="Concentração de Atrasos", color_continuous_scale='Magma')
-                fig_heat.update_layout(template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
+                fig_heat = px.density_heatmap(heatmap_data, x='Status', y='Módulo', z='Qtd', title="Concentração de Atrasos", color_continuous_scale='Blues')
+                fig_heat.update_layout(
+                    template="plotly_white", 
+                    paper_bgcolor='rgba(0,0,0,0)', 
+                    plot_bgcolor='rgba(0,0,0,0)', 
+                    font=dict(family="Inter", color="#111827"),
+                    xaxis=dict(showgrid=False),
+                    yaxis=dict(showgrid=False)
+                )
                 st.plotly_chart(fig_heat, use_container_width=True)
             else:
                 st.success("Sem itens atrasados para gerar heatmap.")
@@ -660,7 +717,14 @@ with tabs[5]:
             
             fig_risk_proj = px.bar(df_risk_proj, x='Qtd Atrasos', y='Projeto', orientation='h', 
                                    title="Top 10 Projetos com Atrasos", text='Qtd Atrasos', color='Qtd Atrasos', color_continuous_scale='Reds')
-            fig_risk_proj.update_layout(template="plotly_white", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="Inter"))
+            fig_risk_proj.update_layout(
+                template="plotly_white", 
+                paper_bgcolor='rgba(0,0,0,0)', 
+                plot_bgcolor='rgba(0,0,0,0)', 
+                font=dict(family="Inter", color="#111827"),
+                xaxis=dict(showgrid=True, gridcolor='#E5E7EB'),
+                yaxis=dict(showgrid=False)
+            )
             st.plotly_chart(fig_risk_proj, use_container_width=True)
         else:
             st.info("Nenhum projeto com atrasos registrados.")
