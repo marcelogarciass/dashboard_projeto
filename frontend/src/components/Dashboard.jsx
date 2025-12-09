@@ -1,5 +1,7 @@
 import React from 'react';
 import KpiCard from './KpiCard';
+import DailyKPIs from './DailyKPIs';
+import DailyTeamTable from './DailyTeamTable';
 import BurndownChart from './charts/BurndownChart';
 import StatusChart from './charts/StatusChart';
 import TypeDistributionChart from './charts/TypeDistributionChart';
@@ -42,6 +44,18 @@ const Dashboard = ({ data }) => {
                     subtext="Reportados"
                 />
             </div>
+
+            {/* Daily Pulse Section */}
+            {data.daily_pulse && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-1">
+                        <DailyKPIs data={data.daily_pulse} />
+                    </div>
+                    <div className="lg:col-span-2">
+                        <DailyTeamTable data={data.daily_pulse.team} />
+                    </div>
+                </div>
+            )}
 
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

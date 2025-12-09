@@ -6,7 +6,7 @@ import pandas as pd
 from jira import JIRA
 import toml
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 
 app = FastAPI(title="Jira Dashboard API")
@@ -79,6 +79,7 @@ def get_data():
             'Projeto': issue.fields.project.name,
             'Criado': issue.fields.created,
             'Resolvido': issue.fields.resolutiondate,
+            'Atualizado': issue.fields.updated,
             'Story Points': float(story_points),
             'Sprint': sprint_name,
             'Módulo': issue.fields.components[0].name if issue.fields.components else 'Geral',
@@ -87,9 +88,11 @@ def get_data():
     
     df = pd.DataFrame(data)
     
-    # Pre-processing
-    df['Criado'] = pd.to_datetime(df['Criado'], utc=True).dt.tz_convert(None)
-    df['Resolvido'] = pd.to_datetime(df['Resolvido'], utc=True).dt.tz_convert(None)
+    # Pre-processing (Convert to Brazil Time)
+    tz = 'America/Sao_Paulo'
+    df['Criado'] = pd.to_datetime(df['Criado'], utc=True).dt.tz_convert(tz).dt.tz_localize(None)
+    df['Resolvido'] = pd.to_datetime(df['Resolvido'], utc=True).dt.tz_convert(tz).dt.tz_localize(None)
+    df['Atualizado'] = pd.to_datetime(df['Atualizado'], utc=True).dt.tz_convert(tz).dt.tz_localize(None)
     df['Data Entrega'] = pd.to_datetime(df['Data Entrega'])
     
     # Status Categories
@@ -207,6 +210,86 @@ def get_dashboard_data(filters: FilterParams):
         points=('Story Points', 'sum')
     ).reset_index().sort_values('points', ascending=False)
     
+    # --- Daily Pulse ---
+    today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # 1. KPIs
+    # Entregues Hoje
+    delivered_today_df = df[(df['Status_Category'] == 'Done') & (df['Resolvido'] >= today_start)]
+    delivered_today_count = len(delivered_today_df)
+    
+    # Criados Hoje
+    created_today_df = df[df['Criado'] >= today_start]
+    created_today_count = len(created_today_df)
+    
+    # 7-day Avg (last 7 days excluding today)
+    start_7d = today_start - timedelta(days=7)
+    
+    # Entregues Avg
+    delivered_last_7d = df[(df['Status_Category'] == 'Done') & (df['Resolvido'] >= start_7d) & (df['Resolvido'] < today_start)]
+    if not delivered_last_7d.empty:
+        daily_delivered = delivered_last_7d.groupby(delivered_last_7d['Resolvido'].dt.date).size()
+        avg_delivered = daily_delivered.mean()
+    else:
+        avg_delivered = 0
+        
+    # Criados Avg
+    created_last_7d = df[(df['Criado'] >= start_7d) & (df['Criado'] < today_start)]
+    if not created_last_7d.empty:
+        daily_created = created_last_7d.groupby(created_last_7d['Criado'].dt.date).size()
+        avg_created = daily_created.mean()
+    else:
+        avg_created = 0
+        
+    daily_pulse = {
+        "delivered": {
+            "value": int(delivered_today_count),
+            "avg": round(float(avg_delivered), 1),
+            "trend": "up" if delivered_today_count >= avg_delivered else "down"
+        },
+        "created": {
+            "value": int(created_today_count),
+            "avg": round(float(avg_created), 1),
+            "trend": "up" if created_today_count >= avg_created else "down"
+        }
+    }
+    
+    # 2. Team Performance
+    all_assignees = sorted(df['Responsável'].dropna().unique().tolist())
+    team_perf = []
+    
+    for member in all_assignees:
+        if member == 'Não Atribuído':
+            continue
+            
+        # Entregues Hoje (Assigned to member)
+        member_delivered = delivered_today_df[delivered_today_df['Responsável'] == member]
+        del_count = len(member_delivered)
+        del_sp = member_delivered['Story Points'].sum()
+        
+        # Criados Hoje (Assigned to member)
+        member_created = created_today_df[created_today_df['Responsável'] == member]
+        created_count = len(member_created)
+        
+        # Status Recente (Last updated today)
+        member_updated_today = df[(df['Responsável'] == member) & (df['Atualizado'] >= today_start)]
+        
+        recent_status = None
+        if not member_updated_today.empty:
+            last_issue = member_updated_today.sort_values('Atualizado', ascending=False).iloc[0]
+            recent_status = f"{last_issue['Chave']} - {last_issue['Status']}"
+            
+        team_perf.append({
+            "name": member,
+            "delivered_count": int(del_count),
+            "delivered_sp": float(del_sp),
+            "created_count": int(created_count),
+            "recent_status": recent_status
+        })
+        
+    team_perf.sort(key=lambda x: (x['delivered_sp'], x['delivered_count']), reverse=True)
+    daily_pulse["team"] = team_perf
+    
     return {
         "kpis": {
             "total": total_issues,
@@ -220,6 +303,7 @@ def get_dashboard_data(filters: FilterParams):
             "type_distribution": type_dist.to_dict(orient='records'),
             "team_load": team_load.to_dict(orient='records')
         },
+        "daily_pulse": daily_pulse,
         "raw_subset": df.head(50).fillna('').to_dict(orient='records') # Preview
     }
 
