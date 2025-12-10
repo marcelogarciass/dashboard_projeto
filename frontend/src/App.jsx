@@ -36,20 +36,25 @@ function App() {
   }, []);
 
   // Load dashboard data when filters change
+  const fetchData = async (forceRefresh = false) => {
+    setLoading(true);
+    try {
+      const data = await getDashboardData({ ...selectedFilters, force_refresh: forceRefresh });
+      setDashboardData(data);
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const data = await getDashboardData(selectedFilters);
-        setDashboardData(data);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, [selectedFilters]);
+
+  const handleRefresh = () => {
+    fetchData(true);
+  };
 
   const handleFilterChange = (key, value) => {
     setSelectedFilters(prev => ({
@@ -65,6 +70,7 @@ function App() {
         availableFilters={availableFilters}
         selectedFilters={selectedFilters}
         onFilterChange={handleFilterChange}
+        onRefresh={handleRefresh}
       />
 
       {/* Main Content */}
@@ -79,14 +85,22 @@ function App() {
           </div>
         </header>
 
-        {loading ? (
-          <div className="flex h-64 items-center justify-center">
-            <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-            <span className="ml-3 text-slate-500 font-medium">Carregando dados...</span>
-          </div>
-        ) : (
-          <Dashboard data={dashboardData} />
-        )}
+        <div className="relative min-h-[400px]">
+          {loading && (
+            <div className={`absolute inset-0 bg-white/80 z-20 flex items-center justify-center backdrop-blur-sm rounded-xl transition-all duration-300 ${!dashboardData ? 'h-64 static bg-transparent' : ''}`}>
+               <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+                  <span className="text-slate-500 font-medium">Carregando dados...</span>
+               </div>
+            </div>
+          )}
+          
+          {dashboardData && (
+             <div className={loading ? 'opacity-50 pointer-events-none filter blur-[1px] transition-all duration-300' : 'transition-all duration-300'}>
+                <Dashboard data={dashboardData} />
+             </div>
+          )}
+        </div>
       </main>
     </div>
   );

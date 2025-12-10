@@ -5,14 +5,14 @@ const DailyTeamTable = ({ data }) => {
     if (!data || data.length === 0) return null;
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden h-full">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                 <h3 className="text-lg font-bold text-slate-800">Performance da Equipe (Hoje)</h3>
                 <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
                     {data.length} Membros
                 </span>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                 <table className="w-full text-sm text-left">
                     <thead className="text-xs text-slate-500 uppercase bg-slate-50">
                         <tr>

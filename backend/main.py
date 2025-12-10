@@ -44,11 +44,11 @@ CACHE = {
     "data": None,
     "last_updated": None
 }
-CACHE_TTL = 3600  # 1 hour
+CACHE_TTL = 600  # 10 minutes (Use 'Refresh' button for real-time)
 
-def get_data():
+def get_data(force_refresh=False):
     now = datetime.now()
-    if CACHE["data"] is not None and CACHE["last_updated"] is not None:
+    if not force_refresh and CACHE["data"] is not None and CACHE["last_updated"] is not None:
         if (now - CACHE["last_updated"]).total_seconds() < CACHE_TTL:
             return CACHE["data"]
 
@@ -110,6 +110,7 @@ class FilterParams(BaseModel):
     statuses: Optional[List[str]] = None
     types: Optional[List[str]] = None
     period: str = "Tudo" # Tudo, Este Mês, Mês Passado, etc.
+    force_refresh: bool = False
 
 @app.get("/api/filters")
 def get_filters():
@@ -123,7 +124,7 @@ def get_filters():
 
 @app.post("/api/dashboard")
 def get_dashboard_data(filters: FilterParams):
-    df = get_data()
+    df = get_data(force_refresh=filters.force_refresh)
     
     # Apply Filters
     if filters.projects and "Todos" not in filters.projects:

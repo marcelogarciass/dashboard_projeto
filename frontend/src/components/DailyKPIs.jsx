@@ -34,7 +34,7 @@ const DailyKPIs = ({ data }) => {
     const { delivered, created } = data;
 
     return (
-        <div className="grid grid-cols-1 gap-6 h-full">
+        <div className="grid grid-cols-1 gap-6">
             <DailyKpiCard 
                 title="Entregues Hoje" 
                 value={delivered.value} 

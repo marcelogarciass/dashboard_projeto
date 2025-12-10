@@ -1,7 +1,7 @@
 import React from 'react';
-import { Filter, LayoutDashboard, Settings } from 'lucide-react';
+import { Filter, LayoutDashboard, Settings, RefreshCw } from 'lucide-react';
 
-const Sidebar = ({ availableFilters, selectedFilters, onFilterChange }) => {
+const Sidebar = ({ availableFilters, selectedFilters, onFilterChange, onRefresh }) => {
   
   const handleMultiSelectChange = (e, key) => {
     const options = e.target.options;
@@ -117,11 +117,19 @@ const Sidebar = ({ availableFilters, selectedFilters, onFilterChange }) => {
         </div>
       </div>
 
-      <div className="p-4 border-t border-slate-100 bg-slate-50">
-        <button className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 transition-colors w-full p-2 rounded-lg hover:bg-white">
-            <LayoutDashboard size={16} />
-            Resetar Visão
-        </button>
+      <div className="p-6 border-t border-slate-100 mt-auto">
+         <button 
+            onClick={onRefresh}
+            className="w-full flex items-center justify-center gap-2 bg-blue-50 text-blue-700 p-2.5 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors mb-4"
+         >
+            <RefreshCw size={16} />
+            Atualizar Dados
+         </button>
+
+        <div className="flex items-center gap-3 text-slate-500 hover:text-slate-800 cursor-pointer transition-colors p-2 rounded-lg hover:bg-slate-50">
+          <Settings size={18} />
+          <span className="text-sm font-medium">Configurações</span>
+        </div>
       </div>
     </aside>
   );
